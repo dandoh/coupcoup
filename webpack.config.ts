@@ -26,7 +26,7 @@ const configuration: Configuration = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: "index.html",
+      template: path.join(__dirname, "src", "index.html"),
       inject: "body",
     }),
   ],

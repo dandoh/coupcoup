@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "NODE_ENV=production webpack"
+    "build": "NODE_ENV=production webpack",
+    "deploy": "yarn build && git add -A && git commit -m \"deploy\" && git push"
   }
 }

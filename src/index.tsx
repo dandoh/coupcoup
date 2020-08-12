@@ -19,7 +19,12 @@ export const process = (v: string): Part[] => {
       (s, index): Part => {
         const m = /^{(.+)}$/.exec(s);
         if (m) {
-          return { type: "input", value: m[1], index };
+          const splitted = m[1].split("::");
+          return {
+            type: "input",
+            value: splitted.length == 2 ? splitted[1] : m[1],
+            index,
+          };
         }
         return { type: "text", value: " " + s + " " };
       },
@@ -38,6 +43,7 @@ export const App: FunctionalComponent<Props> = ({ parts }) => {
         } else {
           const style: Style = {
             backgroundColor: inputVals[p.index] === p.value ? "green" : "white",
+            height: "100px"
           };
           return (
             <input
