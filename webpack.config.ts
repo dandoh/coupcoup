@@ -21,12 +21,12 @@ const configuration: Configuration = {
 
   output: {
     publicPath: "/",
-    path: path.join(__dirname),
+    path: path.join(__dirname, "build"),
   },
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "index.html"),
+      template: "index.html",
       inject: "body",
     }),
   ],
