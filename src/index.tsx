@@ -54,6 +54,7 @@ export const App: FunctionalComponent<Props> = ({ parts }) => {
                   [p.index]: e.currentTarget.value,
                 });
               }}
+              style={style}
               type="text"
             />
           );
