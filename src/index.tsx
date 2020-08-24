@@ -1,6 +1,7 @@
 import { FunctionalComponent, render } from "preact";
 import React from "preact/compat";
 import { useEffect, useState } from "preact/hooks";
+import {extract, Part} from "./extract";
 
 type Answer = Record<number, string | null | undefined>;
 
@@ -26,35 +27,35 @@ interface BackProps {
   answer: Answer;
 }
 
-type Part =
-  | { type: "text"; value: string }
-  | { type: "input"; value: string; index: number };
-
-const preprocess = (v: string): string => {
-  return v.replace(/(<\w+>|<\/\w+>|)/gi, "");
-};
-
-export const process = (v: string): Part[] => {
-  const regex = () => /(\s{|}\s)/gi;
-  let index = 0;
-  return (" " + preprocess(v) + " ")
-    .split(regex())
-    .filter(s => !regex().test(s))
-    .map(
-      (s): Part => {
-        const m = /^{(.+)}$/.exec(s);
-        if (m) {
-          const splitted = m[1].split("::");
-          return {
-            type: "input",
-            value: splitted.length == 2 ? splitted[1] : m[1],
-            index: index++,
-          };
-        }
-        return { type: "text", value: " " + s + " " };
-      },
-    );
-};
+// type Part =
+//   | { type: "text"; value: string }
+//   | { type: "input"; value: string; index: number };
+//
+// const preprocess = (v: string): string => {
+//   return v.replace(/(<\w+>|<\/\w+>|)/gi, "");
+// };
+//
+// export const process = (v: string): Part[] => {
+//   const regex = () => /(\s{|}\s)/gi;
+//   let index = 0;
+//   return (" " + preprocess(v) + " ")
+//     .split(regex())
+//     .filter(s => !regex().test(s))
+//     .map(
+//       (s): Part => {
+//         const m = /^{(.+)}$/.exec(s);
+//         if (m) {
+//           const splitted = m[1].split("::");
+//           return {
+//             type: "input",
+//             value: splitted.length == 2 ? splitted[1] : m[1],
+//             index: index++,
+//           };
+//         }
+//         return { type: "text", value: " " + s + " " };
+//       },
+//     );
+// };
 
 const backgroundColor = (input: string | undefined, answer: string): string => {
   if (!input || input.trim() === "") return "";
@@ -87,7 +88,7 @@ export const Front: FunctionalComponent<FrontProps> = ({
           return <span>{p.value}</span>;
         } else {
           const style = {
-            width: `${50 + p.value.length * 16}px`,
+            width: `${p.value.length * 14}px`,
           };
           return (
             <input
@@ -154,7 +155,7 @@ export const Back: FunctionalComponent<BackProps> = ({ parts, answer }) => {
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  const content = rootElement.getAttribute("query") || "";
+  const content = rootElement.innerText.trim();
   const side = rootElement.getAttribute("side") || "front";
   rootElement.innerHTML = `
 <style>
@@ -166,7 +167,7 @@ if (rootElement) {
         margin-top: 25%;
         font-family: Inter,serif;
         font-size: 20px;
-        line-height: 1.5;
+        line-height: 2;
     }
     .input {
         border-radius: 4px;
@@ -174,7 +175,7 @@ if (rootElement) {
         font-family: Inter,serif;
         font-size: 20px;
         padding: 5px;
-        margin: 0 5px;
+        margin: 2px 5px;
 
     }
     .correct {
@@ -199,7 +200,7 @@ if (rootElement) {
   if (side === "front") {
     render(
       <Front
-        parts={process(content)}
+        parts={extract(content)}
         setGlobalAnswer={a => (window.answer = a)}
       />,
       rootElement,
@@ -213,7 +214,7 @@ if (rootElement) {
     }, 200);
   } else {
     render(
-      <Back parts={process(content)} answer={window.answer || {}} />,
+      <Back parts={extract(content)} answer={window.answer || {}} />,
       rootElement,
     );
   }
