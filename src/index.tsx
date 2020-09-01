@@ -1,7 +1,7 @@
 import { FunctionalComponent, render } from "preact";
 import React from "preact/compat";
 import { useEffect, useState } from "preact/hooks";
-import {extract, Part} from "./extract";
+import { extract, Part } from "./extract";
 
 type Answer = Record<number, string | null | undefined>;
 
@@ -27,35 +27,6 @@ interface BackProps {
   answer: Answer;
 }
 
-// type Part =
-//   | { type: "text"; value: string }
-//   | { type: "input"; value: string; index: number };
-//
-// const preprocess = (v: string): string => {
-//   return v.replace(/(<\w+>|<\/\w+>|)/gi, "");
-// };
-//
-// export const process = (v: string): Part[] => {
-//   const regex = () => /(\s{|}\s)/gi;
-//   let index = 0;
-//   return (" " + preprocess(v) + " ")
-//     .split(regex())
-//     .filter(s => !regex().test(s))
-//     .map(
-//       (s): Part => {
-//         const m = /^{(.+)}$/.exec(s);
-//         if (m) {
-//           const splitted = m[1].split("::");
-//           return {
-//             type: "input",
-//             value: splitted.length == 2 ? splitted[1] : m[1],
-//             index: index++,
-//           };
-//         }
-//         return { type: "text", value: " " + s + " " };
-//       },
-//     );
-// };
 
 const backgroundColor = (input: string | undefined, answer: string): string => {
   if (!input || input.trim() === "") return "";
@@ -69,9 +40,9 @@ const backgroundColor = (input: string | undefined, answer: string): string => {
 };
 
 export const Front: FunctionalComponent<FrontProps> = ({
-  parts,
-  setGlobalAnswer,
-}) => {
+                                                         parts,
+                                                         setGlobalAnswer,
+                                                       }) => {
   useEffect(() => {
     setGlobalAnswer({});
   }, []);
@@ -85,7 +56,21 @@ export const Front: FunctionalComponent<FrontProps> = ({
     <p className="sentence">
       {parts.map(p => {
         if (p.type === "text") {
-          return <span>{p.value}</span>;
+          const lines = p.value.split("\n");
+          return (
+            <>
+              {lines.map((content, id) => {
+                if (id < lines.length - 1) {
+                  return (<>
+                    <span>{content}</span>
+                    <span className="break"/>
+                  </>);
+                }
+
+                return <span>{content}</span>;
+              })}
+            </>
+          );
         } else {
           const style = {
             width: `${p.value.length * 14}px`,
@@ -124,7 +109,21 @@ export const Back: FunctionalComponent<BackProps> = ({ parts, answer }) => {
     <p className="sentence">
       {parts.map(p => {
         if (p.type === "text") {
-          return <span>{p.value}</span>;
+          const lines = p.value.split("\n");
+          return (
+            <>
+              {lines.map((content, id) => {
+                if (id < lines.length - 1) {
+                  return (<>
+                    <span>{content}</span>
+                    <span className="break"/>
+                  </>);
+                }
+
+                return <span>{content}</span>;
+              })}
+            </>
+          );
         } else {
           const res = answer[p.index] || "";
           if (res === "") {
@@ -156,6 +155,10 @@ export const Back: FunctionalComponent<BackProps> = ({ parts, answer }) => {
 const rootElement = document.getElementById("root");
 if (rootElement) {
   const content = rootElement.innerText.trim();
+  // const content = `hello {{world}}
+  //  hello world
+  //  mama
+  //  hello {{world}}`;
   const side = rootElement.getAttribute("side") || "front";
   rootElement.innerHTML = `
 <style>
@@ -177,6 +180,9 @@ if (rootElement) {
         padding: 5px;
         margin: 2px 5px;
 
+    }
+    .break {
+        flex-basis: 100%;
     }
     .correct {
         background-color: rgb(177,236,157);
@@ -214,7 +220,7 @@ if (rootElement) {
     }, 200);
   } else {
     render(
-      <Back parts={extract(content)} answer={window.answer || {}} />,
+      <Back parts={extract(content)} answer={window.answer || {}}/>,
       rootElement,
     );
   }
